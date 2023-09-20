@@ -6,32 +6,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="apiStyle.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 </head>
 
 <body>
+    <div class="container">
+        <header>
+            <h1>API AND DESCRIPTION</h1>
+            <div class="icon" onclick="dropdownActive()">
+                <i class="bi bi-person-circle"></i>
+            </div>
+            <div class="dropdown-content">
+                <span></span>
+                <hr>
+                <button type="button" onclick="logout()" class="logout">LOGOUT</button>
+            </div>
+        </header>
+        <div class="top-right-button">
+            <button type="button">CLEAR ALL</button>
+        </div>
+        <div class="card">
+            <div class="table">
+                <table id="mytable">
+                    <thead>
+                        <tr>
+                            <th>API</th>
+                            <th>Description</th>
+                            <th>Auth</th>
+                            <th>HTTPS</th>
+                            <th>EDIT</th>
+                            <th>DELETE</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
 
-    <table>
-        <thead>
-            <tr>
-                <th>API</th>
-                <th>Description</th>
-                <th>Auth</th>
-                <th>HTTPS</th>
-                <th>Cors</th>
-                <th>Link</th>
-                <th>Category</th>
-            </tr>
-        </thead>
-        <tbody id="table-body">
-        </tbody>
-    </table>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
     <script>
+        
+        let submenu= document.querySelector(".dropdown-content");
+        function dropdownActive() {
+            submenu.classList.toggle("dropdown-content-active");
+        }
 
+        let email = sessionStorage.getItem("mail");
+        document.querySelector(".dropdown-content span").textContent=email;
         let apiData;
 
         if (localStorage.getItem('storedData')) {
             apiData = JSON.parse(localStorage.getItem('storedData'));
+            display(apiData);
         }
         else {
             const xhttp = new XMLHttpRequest();
@@ -41,44 +69,185 @@
                 localStorage.setItem('storedData', JSON.stringify(apiData));
             };
             xhttp.send();
+            display(apiData);
         }
-        const apiTable = document.getElementById('table-body');
-        apiData.entries.forEach(entry => {
-            const row = document.createElement('tr');
-            for (x in entry) {
-                row.innerHTML += `<td contenteditable="true">${entry[x]}</td>`;
-            }
-            apiTable.appendChild(row);
-        });
 
-        const cell = document.querySelectorAll('table td');
+        function display(apiData) {
+            const apiTable = document.getElementById('table-body');
+            if (apiData == null) {
+                document.getElementById("table-body").innerHTML = "";
+                console.log("display at last");
+                const tbody = document.getElementById('table-body');
+                const img = document.createElement('img');
+                img.setAttribute('src', 'images/noDataFound.jfif');
+                const td = document.createElement('td');
+                td.style.borderColor = "none";
+                td.colSpan = 6;
+                td.style.marginTop = "150px";
+                td.style.textAlign = 'center';
+                td.appendChild(img);
+                tbody.appendChild(td);
+
+            }
+            else {
+                console.log("inside else of display");
+                apiData.entries.forEach(entry => {
+                    const row = document.createElement('tr');
+                    let count = 0;
+                    for (x in entry) {
+                        row.innerHTML += `<td>${entry[x]}</td>`;
+                        if (count == 3) {
+                            break;
+                        }
+                        count++;
+                    }
+                    row.innerHTML += `<td>
+                        <button type="button" class="edit">EDIT
+                        </button>
+                        <button type="button" onclick="save(event)" class="save">CONFIRM
+                        </button>
+                        <button type="button" onclick="revoke(event)" class="dont-save">REVOKE
+                        </button>
+                        </td>`
+                    row.innerHTML += `<td><button type="button" class="delete">DELETE</button></td>`
+                    apiTable.appendChild(row);
+                });
+            }
+        }
+
+        const edit = document.getElementsByClassName("edit");
+        for (let x = 0; x < edit.length; x++) {
+            edit[x].addEventListener('click', (event) => {
+                let a = event.target;
+                a.style.display = "none";
+                let row = a.parentElement.parentNode.rowIndex;
+                document.getElementsByClassName("save")[row - 1].style.display = "inline-block";
+                document.getElementsByClassName("dont-save")[row - 1].style.display = "inline-block";
+                const element = document.getElementsByTagName('tr')[row];
+                for (let i = 0; i < 4; i++) {
+                    element.cells[i].contentEditable = true;
+                    element.cells[i].classList.add("border");
+                }
+            });
+        }
+
+        //delete code
+        const del = document.getElementsByClassName("delete");
+        for (let x = 0; x < del.length; x++) {
+            del[x].addEventListener('click', (event) => {
+                let a = event.target
+                let r = a.parentElement.parentNode.rowIndex;
+                document.getElementById('mytable').deleteRow(r);
+                apiData.entries.splice(r-1,1);
+                localStorage.setItem('storedData', JSON.stringify(apiData));
+            });
+        }
+
+        //-------------------------delete code---------------------
+
+        //save code
+        let cells = document.querySelectorAll('td');
+
         let row;
         let col;
         let val;
-        cell.forEach(td => {
+
+        cells.forEach(td => {
             td.addEventListener('input', (event) => {
                 row = td.parentNode.rowIndex;
                 col = td.cellIndex;
                 val = td.innerHTML;
-                saveData(row-1, col+1, val);
+                console.log("hello", row, col, val);
             });
         });
 
+        function save(event) {
+            console.log("inside save function", row - 1, col + 1, val);
+            saveData(row - 1, col + 1, val);
+            let currentRow = event.target.parentElement.parentNode.rowIndex;
+            console.log(row, currentRow);
+            document.getElementsByClassName('save')[currentRow - 1].style.display = "none";
+            document.getElementsByClassName('dont-save')[currentRow - 1].style.display = "none";
+            document.getElementsByClassName('edit')[currentRow - 1].style.display = "inline-block";
+            let element = document.getElementsByTagName('tr')[currentRow];
+            for (let i = 0; i < 4; i++) {
+                element.cells[i].contentEditable = false;
+                element.cells[i].classList.remove("border");
+            }
+        }
+
         function saveData(row, col, val) {
-            console.log(row,col);
+            console.log("saving data", row, col, val);
             let i = 0;
             for (x in apiData.entries[row]) {
                 i++;
                 if (i == col) {
                     apiData.entries[row][x] = val;
+                    console.log("saved data", apiData.entries[row][x]);
                     localStorage.setItem('storedData', JSON.stringify(apiData));
+                    console.log("localstorage value", JSON.parse(localStorage.getItem('storedData')));
                 }
             }
         }
+        //-------------------------------save code-----------
+
+        //revoke code
+
+        function revoke(event) {
+            let row = event.target.parentElement.parentNode.rowIndex;
+            var myData = JSON.parse(localStorage.getItem('storedData'));
+            console.log("mydata", myData.entries[0]);
+            let col = 0;
+            for (i in myData.entries[0]) {
+                let data = myData.entries[row - 1][i];
+                console.log(row, i, data);
+                document.getElementById('mytable').rows[row].cells[col].innerHTML = data;
+                col++;
+                if (col == 4) {
+                    break;
+                }
+            }
+
+            document.getElementsByClassName('save')[row - 1].style.display = "none";
+            document.getElementsByClassName('dont-save')[row - 1].style.display = "none";
+            document.getElementsByClassName('edit')[row - 1].style.display = "inline-block";
+            let element = document.getElementsByTagName('tr')[row];
+            for (let i = 0; i < 4; i++) {
+                element.cells[i].contentEditable = false;
+                element.cells[i].classList.remove("border");
+            }
+        }
+
+
+        //----------------------------revoke code-----------
+
+
+        //top-right clear all button
+        const clearAll = document.getElementsByClassName("top-right-button");
+
+        for (let but = 0; but < clearAll.length; but++) {
+            clearAll[but].addEventListener('click', function () {
+                console.log("inside clear");
+                localStorage.clear();
+                console.log(localStorage.getItem('storedData'));
+                display(JSON.parse(localStorage.getItem('storedData')));
+            });
+        }
+
+        //----------clear all button--------------------------
+
+        //logout
+
+        function logout() {
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href="index.html";
+            console.log("hello");
+        }
+
+        //---------logout--------------
 
     </script>
-
-
 </body>
 
 </html>
