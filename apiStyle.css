@@ -1,0 +1,32 @@
+body {
+    margin: 0;
+}
+
+table {
+    font-family: Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+    overflow: hidden;
+}
+
+thead {
+    background-color: rgb(58, 67, 98);
+    color: white;
+}
+
+tbody {
+    overflow-y: scroll;
+}
+
+td, th {
+    border: 2px solid #aba0a0;
+    padding: 8px;
+}
+
+table tr:nth-child(even){
+    background-color: #f2f2f2;
+}
+
+tbody tr:hover {
+    background-color: #ddd;
+}

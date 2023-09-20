@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="apiStyle.css">
+</head>
+
+<body>
+
+    <table>
+        <thead>
+            <tr>
+                <th>API</th>
+                <th>Description</th>
+                <th>Auth</th>
+                <th>HTTPS</th>
+                <th>Cors</th>
+                <th>Link</th>
+                <th>Category</th>
+            </tr>
+        </thead>
+        <tbody id="table-body">
+        </tbody>
+    </table>
+
+    <script>
+
+        let apiData;
+
+        if (localStorage.getItem('storedData')) {
+            apiData = JSON.parse(localStorage.getItem('storedData'));
+        }
+        else {
+            const xhttp = new XMLHttpRequest();
+            xhttp.open('GET', 'https://api.publicapis.org/entries', false);
+            xhttp.onload = function () {
+                apiData = JSON.parse(xhttp.response);
+                localStorage.setItem('storedData', JSON.stringify(apiData));
+            };
+            xhttp.send();
+        }
+        const apiTable = document.getElementById('table-body');
+        apiData.entries.forEach(entry => {
+            const row = document.createElement('tr');
+            for (x in entry) {
+                row.innerHTML += `<td contenteditable="true">${entry[x]}</td>`;
+            }
+            apiTable.appendChild(row);
+        });
+
+        const cell = document.querySelectorAll('table td');
+        let row;
+        let col;
+        let val;
+        cell.forEach(td => {
+            td.addEventListener('input', (event) => {
+                row = td.parentNode.rowIndex;
+                col = td.cellIndex;
+                val = td.innerHTML;
+                saveData(row-1, col+1, val);
+            });
+        });
+
+        function saveData(row, col, val) {
+            console.log(row,col);
+            let i = 0;
+            for (x in apiData.entries[row]) {
+                i++;
+                if (i == col) {
+                    apiData.entries[row][x] = val;
+                    localStorage.setItem('storedData', JSON.stringify(apiData));
+                }
+            }
+        }
+
+    </script>
+
+
+</body>
+
+</html>
