@@ -5,6 +5,7 @@ body {
 
 .container {
     position: fixed;
+    width: 100%;
 }
 
 header {
@@ -46,6 +47,7 @@ header .dropdown-content span {
 header .dropdown-content-active {
     display:flex;
     position: fixed;
+    z-index: 1;
     right:0;
     top:60px;
     background-color: white;
@@ -76,7 +78,7 @@ header .dropdown-content-active {
   }
 
 .top-right-button button {
-    right: 200px;
+    right: 225px;
     width: 120px;
     height: 50px;
     margin: 8px;
@@ -87,12 +89,12 @@ header .dropdown-content-active {
     box-shadow: 4px 4px 4px 4px rgb(53, 55, 57);
 }
 
-.card {
+.container .card {
     margin: 0 200px;
     margin-top: 70px;
     background-color: lightgray;
     height: 600px;
-    width: 1200px;
+    width: 70%;
     overflow-y: scroll;
     box-shadow: 6px 6px 6px 6px rgb(53, 55, 57);
 }
